@@ -10,7 +10,7 @@ var io = require('socket.io').listen(port);
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/', {  // DB name!!
+mongoose.connect('mongodb://localhost:27017/iot', {  // DB name!!
     useNewUrlParser: true,
     useUnifiedTopology: true,
   }); 
@@ -21,17 +21,23 @@ db.once('open', function callback () {
     console.log("mongo db connection OK.");
 });
 // Schema
-var  = new Schema({
-    
+var  iotSchema= new Schema({
+    date:String,
+    temperature:String,
+    humidity:String,
+    luminosity:String,
 
 
 });
 // Display data on console in the case of saving data.
 iotSchema.methods.info = function () {
-    var iotInfo = 
-    ? "Current date: " + this.date +", Temp: " + this.temperature 
-    + ", Humi: " + this.humidity + ", Lux: " + this.luminosity 
-    : "I don't have a date"
+    var iotInfo = this.date
+        ? "Current date: " +
+         this.date +
+         ", Temp: " +
+         this.temperature 
+        + ", Humi: " + this.humidity + ", Lux: " + this.luminosity 
+        : "I don't have a date"
     console.log("iotInfo: " + iotInfo);
 }
 
@@ -60,7 +66,7 @@ var lux ='';
 var mdata =[]; // this array stores date and data from multiple sensors
 var firstcommaidx = 0;
 
-var Sensor = mongoose.model("Sensor", );  // sensor data model
+var Sensor = mongoose.model("Sensor",iotSchema );  // sensor data model
 
 parser.on('data', function (data) { // call back when data is received
     readData = data.toString(); // append data to buffer
@@ -82,9 +88,9 @@ parser.on('data', function (data) { // call back when data is received
         //console.log(mdata);
         var iot = new ({date:dStr, temperature:temp, humidity:humi, luminosity:lux});
         // save iot data (document) to MongoDB
-        iot.(function(err, iot) {
+        iot.save(function(err, iot) {
             if(err) return handleEvent(err);
-            iot.;  // Display the information of iot data  on console.
+            iot.info;  // Display the information of iot data  on console.
         })
         io.sockets.emit('message', mdata);  // send data to all clients 
     } else {  // error 
